@@ -56,3 +56,9 @@ In your app directory execute:
 Console/cake Mailqueue.SendMail queue smtp
 ```
 
+Donate
+------
+Every donation is welcome
+
+* PayPal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7L95X7SB9B42N
+* Bitcoin: 1NUrWv9zkYaKjLf8zGwk1R6WtgxFPnEBcP
