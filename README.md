@@ -24,11 +24,13 @@ class EmailConfig
         // required:
         'transport' => 'Mailqueue.Queue',
         'from' => 'your.name@example.com',
+
         // optional:
         'queueFolder' => '/tmp/mailqueue' // storage location for mailqueue
+        'requeue' => array(300, 500, 1000) // requeue after x seconds in case of an error
     );
 
-    // Your exiting config
+    // Your existing config
     public $smtp = array(...)
 }
 ```
