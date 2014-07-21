@@ -13,7 +13,7 @@ class SendMailTask extends Shell
         }
 
         $queueMailer = new CakeEmail($this->args[0]);
-        $realMailer = new CakeEmail(empty($this->args[1]));
+        $realMailer = new CakeEmail(empty($this->args[1]) ? null:$this->args[1]);
         $queueMailer->transportClass()->flush($realMailer);
     }
 
