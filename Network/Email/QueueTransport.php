@@ -134,7 +134,8 @@ class QueueTransport extends AbstractTransport
         }
         catch (SocketException $e)
         {
-            CakeLog::error("Mailqueue real send: " . $e->getMessage(), 'Mailqueue');
+            $logMessage = sprintf("(%s) %s @ %s:%s", $e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+            CakeLog::error("Mailqueue real send: " . $logMessage, 'Mailqueue');
         }
         return false;
     }
