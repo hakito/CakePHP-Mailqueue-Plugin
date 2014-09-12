@@ -1,0 +1,17 @@
+{
+    "name": "hakito/cakephp-mailqueue-plugin",
+    "description": "Plugin to store mail in a queue for later sendout",
+    "keywords": ["cakephp", "email", "queue"],
+    "type": "library",
+    "license": "GPL-2.0",
+    "homepage": "https://github.com/hakito/CakePHP-Mailqueue-Plugin",
+    "authors": [
+        {
+            "name": "Gerd Katzenbeisser",
+            "homepage": "https://github.com/hakito/CakePHP-Mailqueue-Plugin/graphs/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
