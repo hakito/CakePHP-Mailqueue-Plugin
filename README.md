@@ -12,7 +12,19 @@ With this plugin you can save the mail to a local queue file and invoke the actu
 Installation
 -------------
 
-Download the plugin to app/Plugin/Mailqueue.
+If you are using composer simply add the following requirement to your composer file:
+
+```json
+"hakito/cakephp-mailqueue-plugin": ">=1.2"
+```
+
+Otherwise download the plugin to app/Plugin/Mailqueue.
+
+Simply load the plugin in your bootstrap:
+
+```php
+CakePlugin::load('Mailqueue');
+```
 
 Configuration
 -------------
