@@ -29,24 +29,34 @@ CakePlugin::load('Mailqueue');
 Configuration
 -------------
 
-Add a new entry to the app/Config/email.php or replace it with an existing one.
+Add a transport entry to your app_local.php
 
 ```php
-class EmailConfig
-{
-    public $queue = array(
-        // required:
-        'transport' => 'Mailqueue.Queue',
-        'from' => 'your.name@example.com',
+'EmailTransport' => [
+    'MailQueue' => [
+        // required
+        'className' => \MailQueue\Mailer\Transport\QueueTransport::class,
+        'queueFolder' => TMP . 'mailqueue', // storage location for mailqueue
 
         // optional:
-        'queueFolder' => '/tmp/mailqueue', // storage location for mailqueue
-        'requeue' => array(300, 500, 1000) // requeue after x seconds in case of an error
-    );
+        'requeue' => [300, 500, 1000] // requeue after x seconds in case of an error
+    ]
+],
 
-    // Your existing config
-    public $smtp = array(...)
-}
+'Email' => [
+    'default' => [
+        'transport' => 'MailQueue',
+    ],
+    'smtp' => [
+        // configure your real mailer here
+    ]
+]
+```
+
+Load the plugin in your bootstrap method
+
+```php
+$this->addPlugin('MailQueue');
 ```
 
 Queue a mail
@@ -55,8 +65,7 @@ Queue a mail
 Send mail to the queue as usually in cake
 
 ```php
-App::uses('CakeEmail', 'Network/Email');
-$email = new CakeEmail('queue');
+$email = new Email('default');
 // place your content in $email
 $email->send();
 ```
@@ -69,12 +78,5 @@ Use cake shell to do the real sendout. The shell script requires 2 arguments. Th
 In your app directory execute:
 
 ```sh
-Console/cake Mailqueue.SendMail queue smtp
+bin/cake MailQueue SendMail smtp
 ```
-
-Donate
-------
-Every donation is welcome
-
-* PayPal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7L95X7SB9B42N
-* Bitcoin: 1NUrWv9zkYaKjLf8zGwk1R6WtgxFPnEBcP

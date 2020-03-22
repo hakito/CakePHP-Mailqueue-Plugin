@@ -1,26 +1,17 @@
 <?php
 
-App::uses('AbstractTransport', 'Network/Email');
+namespace MailQueue\Mailer\Transport;
+
+use Cake\Mailer\AbstractTransport;
+use Cake\Mailer\Email;
+use Cake\Log\Log;
 
 class QueueTransport extends AbstractTransport
 {
 
     private static $fileSuffix = '.QUEUE.';
 
-    public function config($config = null)
-    {
-        $default = array(
-            'queueFolder' => TMP . 'mailqueue',
-        );
-        $this->_config = $config + $default;
-    }
-
-    public function queueFolder($queueFolder)
-    {
-        $this->_config['queueFolder'] = $queueFolder;
-    }
-
-    public function send(CakeEmail $email)
+    public function send(Email $email)
     {
         if (!is_dir($this->_config['queueFolder']))
             mkdir($this->_config['queueFolder']);
@@ -36,44 +27,45 @@ class QueueTransport extends AbstractTransport
         }
         else
         {
-            throw new QueueFileException(array('filename' => $filename));
+            throw new QueueFileException(['filename' => $filename]);
         }
 
         fclose($fh);
-        return array('filename' => $filename);
+        return ['filename' => $filename];
     }
 
     /**
      * Sendout mail queue using the given real mailer
-     * @param CakeEmail $realMailer
+     * @param Cake\Mailer\AbstractTransport $realTransport
      */
-    public function flush($realMailer)
+    public function flush(AbstractTransport $realTransport, bool $noBlock = false)
     {
         $lockfile = $this->_config['queueFolder'] . DS . 'flush.lock';
         touch($lockfile);
         $lock = fopen($lockfile, 'r');
-        if (!flock($lock, LOCK_EX))
-        {            
+        $noBlock = $noBlock ? LOCK_NB : 0;
+        if (!flock($lock, LOCK_EX | $noBlock))
+        {
             fclose($lock);
-            throw new Exception('Could not get a lock for ' . $lockfile);
+            throw new FlushException(['filename' => $lockfile]);
         }
 
-        $processed = array();
+        $processed = [];
         while ($queueFile = $this->getNext())
         {
             if (array_key_exists($queueFile, $processed))
-                throw new LogicException(sprintf('Trying to process queue file "%s" more than once.', $queueFile));
+                throw new \LogicException(sprintf('Trying to process queue file "%s" more than once.', $queueFile));
 
             $processed[$queueFile] = true;
-            
+
             $delFile = false;
             $fh = fopen($queueFile, 'r');
             if (flock($fh, LOCK_EX))
             {
                 $serialized = fread($fh, filesize($queueFile));
                 $cakeMail = unserialize($serialized);
-                
-                $delFile = $this->tryRealSend($realMailer, $cakeMail);
+
+                $delFile = $this->tryRealSend($realTransport, $cakeMail);
                 if ($delFile === false)
                 {
                     $this->tryRequeue($queueFile);
@@ -94,14 +86,14 @@ class QueueTransport extends AbstractTransport
         $filename = basename($queueFile);
         $dirname = dirname($queueFile);
         $targetFilename = 'UNSENT.' . $filename;
-        
+
         if (!empty($this->_config['requeue']))
         {
             $parts = explode(self::$fileSuffix, $queueFile);
             $rparts = explode('.R.', $parts[1], 2);
             $retry = 0;
             $tempnamSuffix = 0;
-            
+
             if (sizeof($rparts) > 1 && is_numeric($rparts[0]))
             {
                 $tempnamSuffix = 1;
@@ -110,7 +102,7 @@ class QueueTransport extends AbstractTransport
 
             if (isset($this->_config['requeue'][$retry]))
             {
-                $future = max(0, $this->_config['requeue'][$retry]);                
+                $future = max(0, $this->_config['requeue'][$retry]);
                 $targetFilename = (time() + $future) . self::$fileSuffix . $retry . '.R.' . $rparts[$tempnamSuffix];
             }
         }
@@ -120,22 +112,21 @@ class QueueTransport extends AbstractTransport
 
     /**
      * Trys to do the real sendout. In case of a SockeException the mail will
-     * @param CakeMail $realMailer
-     * @param CakeMail $cakeMail queued mail
+     * @param Cake\Mailer\AbstractTransport $realTransport
+     * @param Cake\Mailer\Email $cakeMail queued mail
      * @return boolean true on success
-     * @throws SocketException
      */
-    private function tryRealSend($realMailer, $cakeMail)
+    private function tryRealSend(AbstractTransport $realTransport, Email $cakeMail)
     {
         try
         {
-            if ($realMailer->transportClass()->send($cakeMail))
+            if ($realTransport->send($cakeMail))
                 return true;
         }
-        catch (SocketException $e)
+        catch (\Exception $e)
         {
             $logMessage = sprintf("(%s) %s @ %s:%s", $e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
-            CakeLog::error("Mailqueue real send: " . $logMessage, 'Mailqueue');
+            Log::error("Mailqueue real send: " . $logMessage, 'MailQueue');
         }
         return false;
     }
@@ -170,7 +161,7 @@ class QueueTransport extends AbstractTransport
                 continue;
 
             closedir($dh);
-            return $full_path;            
+            return $full_path;
         }
         closedir($dh);
 
@@ -179,9 +170,4 @@ class QueueTransport extends AbstractTransport
 
 }
 
-class QueueFileException extends CakeException
-{
 
-    protected $_messageTemplate = 'File %s could not be locked for queueing.';
-
-}
