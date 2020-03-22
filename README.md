@@ -1,7 +1,10 @@
-[![Latest Stable Version](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/v/stable.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![Total Downloads](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/downloads.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![Latest Unstable Version](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/v/unstable.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![License](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/license.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin)
 
 CakePHP-Mailqueue-Plugin
 ========================
+
+[![Build Status](https://travis-ci.com/hakito/CakePHP-Mailqueue-Plugin.svg?branch=master)](https://travis-ci.com/hakito/CakePHP-Mailqueue-Plugin)
+[![Coverage Status](https://coveralls.io/repos/github/hakito/CakePHP-Mailqueue-Plugin/badge.svg?branch=master)](https://coveralls.io/github/hakito/CakePHP-Mailqueue-Plugin?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/v/stable.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![Total Downloads](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/downloads.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![Latest Unstable Version](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/v/unstable.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![License](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/license.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin)
 
 Plugin to store mail in a queue for later sendout.
 
@@ -12,18 +15,18 @@ With this plugin you can save the mail to a local queue file and invoke the actu
 Installation
 -------------
 
-If you are using composer simply add the following requirement to your composer file:
+If you are using composer simply add it with:
 
-```json
-"hakito/cakephp-mailqueue-plugin": ">=1.2"
+```bash
+composer require hakito/cakephp-mailqueue-plugin
 ```
 
 Otherwise download the plugin to app/Plugin/Mailqueue.
 
-Simply load the plugin in your bootstrap:
+Load the plugin in your bootstrap method
 
 ```php
-CakePlugin::load('Mailqueue');
+$this->addPlugin('MailQueue');
 ```
 
 Configuration
@@ -51,12 +54,6 @@ Add a transport entry to your app_local.php
         // configure your real mailer here
     ]
 ]
-```
-
-Load the plugin in your bootstrap method
-
-```php
-$this->addPlugin('MailQueue');
 ```
 
 Queue a mail
