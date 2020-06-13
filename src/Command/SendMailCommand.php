@@ -12,7 +12,7 @@ class SendMailCommand extends Command
     {
         try
         {
-            if (sizeof($args->args) < 2)
+            if (sizeof($args->getArguments()) < 2)
             {
                 throw new \InvalidArgumentException('Required arguments "queue-name", "transport configuration name"');
             }
