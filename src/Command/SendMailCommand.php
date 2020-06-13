@@ -5,6 +5,7 @@ namespace MailQueue\Command;
 use Cake\Console\Arguments;
 use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
+use Cake\Mailer\Email;
 
 class SendMailCommand extends Command
 {
