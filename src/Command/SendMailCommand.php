@@ -15,12 +15,12 @@ class SendMailCommand extends Command
         {
             if (sizeof($args->getArguments()) < 2)
             {
-                throw new \InvalidArgumentException('Required arguments "queue-name", "transport configuration name"');
+                throw new \InvalidArgumentException('Required arguments "queue-profile", "real-send-profile"');
             }
 
             $queueMailer = new Email($args->getArgumentAt(0));
             $realMailer = new Email($args->getArgumentAt(1));
-            $queueMailer->transportClass()->flush($realMailer);
+            $queueMailer->getTransport()->flush($realMailer->getTransport());
         }
         catch (\InvalidArgumentException $e)
         {
