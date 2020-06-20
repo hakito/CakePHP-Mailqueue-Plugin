@@ -6,6 +6,8 @@ use Cake\Mailer\AbstractTransport;
 use Cake\Mailer\Email;
 use Cake\Log\Log;
 
+use MailQueue\Mailer\PersistableMail;
+
 class QueueTransport extends AbstractTransport
 {
 
@@ -21,7 +23,9 @@ class QueueTransport extends AbstractTransport
         $fh = fopen($filename, 'w');
         if (flock($fh, LOCK_EX))
         {
-            fwrite($fh, serialize($email));
+            $persistableMail = new PersistableMail($email);
+            $serialized = $persistableMail->serialize();
+            fwrite($fh, $serialized);
             chmod($filename, 0666);
             flock($fh, LOCK_UN);
         }
@@ -63,9 +67,10 @@ class QueueTransport extends AbstractTransport
             if (flock($fh, LOCK_EX))
             {
                 $serialized = fread($fh, filesize($queueFile));
-                $cakeMail = unserialize($serialized);
+                $email = new PersistableMail();
+                $email->unserialize($serialized);
 
-                $delFile = $this->tryRealSend($realTransport, $cakeMail);
+                $delFile = $this->tryRealSend($realTransport, $email);
                 if ($delFile === false)
                 {
                     $this->tryRequeue($queueFile);
@@ -113,14 +118,15 @@ class QueueTransport extends AbstractTransport
     /**
      * Trys to do the real sendout. In case of a SockeException the mail will
      * @param Cake\Mailer\AbstractTransport $realTransport
-     * @param Cake\Mailer\Email $cakeMail queued mail
+     * @param Cake\Mailer\Email $email queued mail
      * @return boolean true on success
      */
-    private function tryRealSend(AbstractTransport $realTransport, Email $cakeMail)
+    private function tryRealSend(AbstractTransport $realTransport, PersistableMail $email)
     {
         try
         {
-            if ($realTransport->send($cakeMail))
+            $email->setTransportInstance($realTransport);
+            $email->send();
                 return true;
         }
         catch (\Exception $e)
