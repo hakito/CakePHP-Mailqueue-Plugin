@@ -3,17 +3,17 @@
 namespace MailQueue\Mailer\Transport;
 
 use Cake\Mailer\AbstractTransport;
-use Cake\Mailer\Email;
+use Cake\Mailer\Message;
 use Cake\Log\Log;
 
-use MailQueue\Mailer\PersistableMail;
+use MailQueue\Mailer\PersistableMessage;
 
 class QueueTransport extends AbstractTransport
 {
 
     private static $fileSuffix = '.QUEUE.';
 
-    public function send(Email $email)
+    public function send(Message $message): array
     {
         if (!is_dir($this->_config['queueFolder']))
             mkdir($this->_config['queueFolder']);
@@ -23,7 +23,7 @@ class QueueTransport extends AbstractTransport
         $fh = fopen($filename, 'w');
         if (flock($fh, LOCK_EX))
         {
-            $persistableMail = new PersistableMail($email);
+            $persistableMail = new PersistableMessage($message);
             $serialized = $persistableMail->serialize();
             fwrite($fh, $serialized);
             chmod($filename, 0666);
@@ -67,10 +67,10 @@ class QueueTransport extends AbstractTransport
             if (flock($fh, LOCK_EX))
             {
                 $serialized = fread($fh, filesize($queueFile));
-                $email = new PersistableMail();
-                $email->unserialize($serialized);
+                $message = new PersistableMessage();
+                $message->unserialize($serialized);
 
-                $delFile = $this->tryRealSend($realTransport, $email);
+                $delFile = $this->tryRealSend($realTransport, $message);
                 if ($delFile === false)
                 {
                     $this->tryRequeue($queueFile);
@@ -118,16 +118,15 @@ class QueueTransport extends AbstractTransport
     /**
      * Trys to do the real sendout. In case of a SockeException the mail will
      * @param Cake\Mailer\AbstractTransport $realTransport
-     * @param Cake\Mailer\Email $email queued mail
+     * @param PersistableMessage $message queued mail
      * @return boolean true on success
      */
-    private function tryRealSend(AbstractTransport $realTransport, PersistableMail $email)
+    private function tryRealSend(AbstractTransport $realTransport, PersistableMessage $message)
     {
         try
         {
-            $email->setTransportInstance($realTransport);
-            $email->send();
-                return true;
+            $realTransport->send($message);
+            return true;
         }
         catch (\Exception $e)
         {

@@ -2,10 +2,11 @@
 
 namespace MailQueue\Command;
 
+use Cake\Command\Command;
 use Cake\Console\Arguments;
-use Cake\Console\Command;
 use Cake\Console\ConsoleIo;
-use Cake\Mailer\Email;
+use Cake\Mailer\Mailer;
+use MailQueue\Mailer\Transport\QueueTransport;
 
 class SendMailCommand extends Command
 {
@@ -18,9 +19,12 @@ class SendMailCommand extends Command
                 throw new \InvalidArgumentException('Required arguments "queue-profile", "real-send-profile"');
             }
 
-            $queueMailer = new Email($args->getArgumentAt(0));
-            $realMailer = new Email($args->getArgumentAt(1));
-            $queueMailer->getTransport()->flush($realMailer->getTransport());
+            $queueMailer = new Mailer($args->getArgumentAt(0));
+            $realMailer = new Mailer($args->getArgumentAt(1));
+
+            /** @var QueueTransport */
+            $transport = $queueMailer->getTransport();
+            $transport->flush($realMailer->getTransport());
         }
         catch (\InvalidArgumentException $e)
         {

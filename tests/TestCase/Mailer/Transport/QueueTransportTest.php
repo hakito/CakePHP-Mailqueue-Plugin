@@ -2,42 +2,43 @@
 
 namespace MailQueue\Test\TestCase\Mailer\Transport;
 
-use Cake\Mailer\Email;
+use Cake\Mailer\Mailer;
 use Cake\TestSuite\TestCase;
-
-use MailQueue\Mailer\Transport\QueueTransport;
+use DirectoryIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
  * @property \Cake\Mailer\Email email
  */
 class QueueTransportTest extends TestCase
 {
-    private $email;
+    private $mailer;
     private $config;
     private $unlockInTeardown;
     private $mTransport;
 
-    public function setUp()
+    public function setUp(): void
     {
-        $this->email = new Email('default');
-        $this->config = $this->email->getTransport()->getConfig(null);
+        $this->mailer = new Mailer('default');
+        $this->config = $this->mailer->getTransport()->getConfig(null);
         $this->mTransport = $this->getMockBuilder(\Cake\Mailer\AbstractTransport::class)
             ->setMethods(['send'])
             ->getMock();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
-        $this->folder()->delete();
+        self::recursiveRemoveDirectory($this->config['queueFolder']);
         if ($this->unlockInTeardown != null)
             flock($this->unlockInTeardown, LOCK_UN);
     }
 
     public function testSend()
     {
-        $this->email
+        $this->mailer
             ->setTo('foo@example.com', 'Foo Bar')
-            ->send('Hello world');
+            ->deliver('Hello world');
 
         $this->assertTrue(\file_exists($this->config['queueFolder']));
         $files = scandir($this->config['queueFolder']);
@@ -46,11 +47,11 @@ class QueueTransportTest extends TestCase
 
     public function testFlushThrowsFlushException()
     {
-        $this->email
+        $this->mailer
             ->setTo('foo@example.com', 'Foo Bar')
-            ->send('Hello world');
+            ->deliver('Hello world');
 
-        $lockfile = $this->folder()->realPath('flush.lock');
+        $lockfile = $this->config['queueFolder'] . DS . 'flush.lock';
         touch($lockfile);
         $fh = fopen($lockfile, 'r');
 
@@ -58,7 +59,7 @@ class QueueTransportTest extends TestCase
         $this->unlockInTeardown = $fh;
 
         $this->expectException(\MailQueue\Mailer\Transport\FlushException::class);
-        $this->email->getTransport()->flush($this->mTransport, true);
+        $this->mailer->getTransport()->flush($this->mTransport, true);
     }
 
     public function testFlushRequeue()
@@ -67,25 +68,40 @@ class QueueTransportTest extends TestCase
             ->method('send')
             ->will($this->throwException(new \Exception('bar')));
 
-        $originalFile = $this->email
+        $originalFile = $this->mailer
             ->setTo('foo@example.com', 'Foo Bar')
-            ->send('Hello world')
+            ->deliver('Hello world')
             ['filename'];
 
         $contents = \file_get_contents($originalFile);
-        $this->email->getTransport()->flush($this->mTransport);
+        $this->mailer->getTransport()->flush($this->mTransport);
         $this->assertFalse(\file_exists($originalFile));
-        
-        $newFile = $this->folder()->find()[0];
-        $newContents = \file_get_contents($this->folder()->realpath($newFile));
+
+        $iterator = $this->folder();
+         while (!$iterator->current()->isFile())
+            $iterator->next();
+        $newFile = $iterator->current();
+        $newContents = \file_get_contents($newFile->getPathname());
         $this->assertEquals($contents, $newContents);
     }
 
-    /**
-     * @return \Cake\Filesystem\Folder
-     */
     private function folder()
     {
-        return new \Cake\Filesystem\Folder($this->config['queueFolder']);
+        return new DirectoryIterator($this->config['queueFolder']);
+    }
+
+    private static function recursiveRemoveDirectory($dir)
+    {
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($files as $fileinfo) {
+            $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+            $todo($fileinfo->getRealPath());
+        }
+
+        rmdir($dir);
     }
 }
