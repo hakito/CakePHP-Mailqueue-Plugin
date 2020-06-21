@@ -6,7 +6,7 @@ CakePHP-Mailqueue-Plugin
 [![Coverage Status](https://coveralls.io/repos/github/hakito/CakePHP-Mailqueue-Plugin/badge.svg?branch=master)](https://coveralls.io/github/hakito/CakePHP-Mailqueue-Plugin?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/v/stable.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![Total Downloads](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/downloads.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![Latest Unstable Version](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/v/unstable.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![License](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/license.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin)
 
-Plugin to store mail in a queue for later sendout.
+CakePHP 3.x plugin to store mail in a queue for later sendout.
 
 When working with emails on a webservice sending email blocks the http request until the email is actually sent out. This can be frustrating for a user especially if the smtp server does not respond promptly.
 
