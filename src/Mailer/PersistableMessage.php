@@ -11,16 +11,16 @@ class PersistableMessage extends Message
         if ($email === null)
             return;
         $this->createFromArray($email->jsonSerialize());
-        $this->_message = $email->message;
-        $this->_htmlMessage = $email->htmlMessage;
-        $this->_textMessage = $email->textMessage;
+        $this->message = $email->message;
+        $this->htmlMessage = $email->htmlMessage;
+        $this->textMessage = $email->textMessage;
     }
 
     public function jsonSerialize(): array
     {
         $array = parent::jsonSerialize();
 
-        $properties = ['_message', '_htmlMessage', '_textMessage'];
+        $properties = ['message', 'htmlMessage', 'textMessage'];
         foreach($properties as $property)
             $array[$property] = $this->{$property};
         return $array;
