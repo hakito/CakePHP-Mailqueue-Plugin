@@ -2,7 +2,7 @@
 CakePHP-Mailqueue-Plugin
 ========================
 
-[![Build Status](https://travis-ci.com/hakito/CakePHP-Mailqueue-Plugin.svg?branch=master)](https://travis-ci.com/hakito/CakePHP-Mailqueue-Plugin)
+[![Build Status](https://app.travis-ci.com/hakito/CakePHP-Mailqueue-Plugin.svg?branch=master)](https://app.travis-ci.com/hakito/CakePHP-Mailqueue-Plugin)
 [![Coverage Status](https://coveralls.io/repos/github/hakito/CakePHP-Mailqueue-Plugin/badge.svg?branch=master)](https://coveralls.io/github/hakito/CakePHP-Mailqueue-Plugin?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/v/stable.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![Total Downloads](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/downloads.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![Latest Unstable Version](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/v/unstable.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin) [![License](https://poser.pugx.org/hakito/cakephp-mailqueue-plugin/license.svg)](https://packagist.org/packages/hakito/cakephp-mailqueue-plugin)
 
