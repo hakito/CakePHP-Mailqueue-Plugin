@@ -7,4 +7,4 @@ app/[Cc]onfig/database.php
 !empty
 vendor/*
 *.lock
-.phpunit.result.cache
+.phpunit.cache

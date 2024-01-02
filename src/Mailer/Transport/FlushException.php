@@ -2,9 +2,9 @@
 
 namespace MailQueue\Mailer\Transport;
 
-class FlushException extends \Cake\Core\Exception\Exception
+class FlushException extends \Cake\Core\Exception\CakeException
 {
 
-    protected $_messageTemplate = 'Could not get a lock for %s';
+    protected string $_messageTemplate = 'Could not get a lock for %s';
 
 }

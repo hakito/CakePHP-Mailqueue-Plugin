@@ -24,7 +24,7 @@ class QueueTransport extends AbstractTransport
         if (flock($fh, LOCK_EX))
         {
             $persistableMail = new PersistableMessage($message);
-            $serialized = $persistableMail->serialize();
+            $serialized = serialize($persistableMail->jsonSerialize());
             fwrite($fh, $serialized);
             chmod($filename, 0666);
             flock($fh, LOCK_UN);
@@ -40,7 +40,7 @@ class QueueTransport extends AbstractTransport
 
     /**
      * Sendout mail queue using the given real mailer
-     * @param Cake\Mailer\AbstractTransport $realTransport
+     * @param AbstractTransport $realTransport
      */
     public function flush(AbstractTransport $realTransport, bool $noBlock = false)
     {
@@ -68,7 +68,7 @@ class QueueTransport extends AbstractTransport
             {
                 $serialized = fread($fh, filesize($queueFile));
                 $message = new PersistableMessage();
-                $message->unserialize($serialized);
+                $message->createFromArray(unserialize($serialized));
 
                 $delFile = $this->tryRealSend($realTransport, $message);
                 if ($delFile === false)
@@ -117,7 +117,7 @@ class QueueTransport extends AbstractTransport
 
     /**
      * Trys to do the real sendout. In case of a SockeException the mail will
-     * @param Cake\Mailer\AbstractTransport $realTransport
+     * @param AbstractTransport $realTransport
      * @param PersistableMessage $message queued mail
      * @return boolean true on success
      */

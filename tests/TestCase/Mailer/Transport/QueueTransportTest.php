@@ -9,7 +9,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * @property \Cake\Mailer\Email email
+ * @property \Cake\Mailer\Mailer email
  */
 class QueueTransportTest extends TestCase
 {
@@ -23,7 +23,7 @@ class QueueTransportTest extends TestCase
         $this->mailer = new Mailer('default');
         $this->config = $this->mailer->getTransport()->getConfig(null);
         $this->mTransport = $this->getMockBuilder(\Cake\Mailer\AbstractTransport::class)
-            ->setMethods(['send'])
+            ->onlyMethods(['send'])
             ->getMock();
     }
 
