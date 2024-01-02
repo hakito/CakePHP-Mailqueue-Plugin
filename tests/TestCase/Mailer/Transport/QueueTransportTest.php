@@ -78,7 +78,7 @@ class QueueTransportTest extends TestCase
         $this->assertFalse(\file_exists($originalFile));
 
         $iterator = $this->folder();
-         while (!$iterator->current()->isFile())
+        while (!$iterator->current()->isFile() || $iterator->current()->getFilename() == 'flush.lock')
             $iterator->next();
         $newFile = $iterator->current();
         $newContents = \file_get_contents($newFile->getPathname());
